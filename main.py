@@ -58,6 +58,70 @@ def test_database():
 
     return response
 
+# Fallback packs used when database has no entries yet
+DEFAULT_PACKS = [
+    {
+        "platform": "Facebook & Instagram",
+        "logo": "https://cdn.simpleicons.org/meta/ffffff",
+        "name": "Pack Starter",
+        "price_DA": "15,000 DA",
+        "duration": "7 jours",
+        "results": ["+5k vues", "+300 clics", "+50 leads"],
+        "advantages": ["Ciblage basique", "Créa 1 visuel"],
+        "objective": "Trafic"
+    },
+    {
+        "platform": "Facebook & Instagram",
+        "logo": "https://cdn.simpleicons.org/meta/ffffff",
+        "name": "Pack Boost",
+        "price_DA": "30,000 DA",
+        "duration": "14 jours",
+        "results": ["+15k vues", "+1k clics", "+150 leads"],
+        "advantages": ["A/B test créa", "Ciblage lookalike"],
+        "objective": "Conversions"
+    },
+    {
+        "platform": "TikTok",
+        "logo": "https://cdn.simpleicons.org/tiktok/ffffff",
+        "name": "Pack Viral",
+        "price_DA": "25,000 DA",
+        "duration": "10 jours",
+        "results": ["+50k vues", "+2k interactions"],
+        "advantages": ["Spark Ads", "UGC conseillé"],
+        "objective": "Reach"
+    },
+    {
+        "platform": "YouTube",
+        "logo": "https://cdn.simpleicons.org/youtube/ffffff",
+        "name": "Pack Viewers",
+        "price_DA": "20,000 DA",
+        "duration": "7 jours",
+        "results": ["+10k vues", "+60% VTR"],
+        "advantages": ["InStream Skippable"],
+        "objective": "Branding"
+    },
+    {
+        "platform": "Google Ads",
+        "logo": "https://cdn.simpleicons.org/googleads/ffffff",
+        "name": "Pack Search",
+        "price_DA": "35,000 DA",
+        "duration": "14 jours",
+        "results": ["CPC optimisé", "+200 conversions"],
+        "advantages": ["Extensions d’annonces", "Remarketing"],
+        "objective": "Leads"
+    },
+    {
+        "platform": "LinkedIn",
+        "logo": "https://cdn.simpleicons.org/linkedin/ffffff",
+        "name": "Pack Pro",
+        "price_DA": "40,000 DA",
+        "duration": "14 jours",
+        "results": ["+50 prospects B2B"],
+        "advantages": ["Ciblage par poste", "Lead Gen Forms"],
+        "objective": "Prospection"
+    }
+]
+
 # Packs endpoints
 @app.post("/api/packs", response_model=dict)
 def create_pack(pack: Pack):
@@ -69,8 +133,12 @@ def create_pack(pack: Pack):
 @app.get("/api/packs", response_model=List[dict])
 def list_packs():
     if db is None:
-        raise HTTPException(status_code=500, detail="Database not configured")
+        # If database is not configured, still return defaults so frontend shows multiple packs
+        return DEFAULT_PACKS
     docs = get_documents("pack")
+    if not docs:
+        # return defaults when empty (no seeding to DB to keep it idempotent)
+        return DEFAULT_PACKS
     # Convert ObjectId
     for d in docs:
         d["id"] = str(d.pop("_id", ""))
