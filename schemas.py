@@ -11,16 +11,11 @@ Model name is converted to lowercase for the collection name:
 - BlogPost -> "blogs" collection
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, List
 
-# Example schemas (replace with your own):
-
+# Existing example schemas (kept for reference)
 class User(BaseModel):
-    """
-    Users collection schema
-    Collection name: "user" (lowercase of class name)
-    """
     name: str = Field(..., description="Full name")
     email: str = Field(..., description="Email address")
     address: str = Field(..., description="Address")
@@ -28,21 +23,33 @@ class User(BaseModel):
     is_active: bool = Field(True, description="Whether user is active")
 
 class Product(BaseModel):
-    """
-    Products collection schema
-    Collection name: "product" (lowercase of class name)
-    """
     title: str = Field(..., description="Product title")
     description: Optional[str] = Field(None, description="Product description")
     price: float = Field(..., ge=0, description="Price in dollars")
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+# Sponsorisily schemas
+class Pack(BaseModel):
+    platform: str = Field(..., description="Platform(s) for the pack, e.g., Facebook & Instagram")
+    name: str = Field(..., description="Pack display name")
+    price_DA: Optional[str] = Field(None, description="Price in Algerian Dinar (formatted)")
+    duration: Optional[str] = Field(None, description="Duration label, e.g., 7 jours")
+    results: List[str] = Field(default_factory=list, description="Expected results highlights")
+    advantages: List[str] = Field(default_factory=list, description="Advantages list")
+    objective: Optional[str] = Field(None, description="Primary marketing objective")
+    logo: Optional[str] = Field(None, description="Logo URL for the platform")
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class QuoteRequest(BaseModel):
+    full_name: str = Field(..., description="Client full name")
+    email: Optional[EmailStr] = Field(None, description="Client email")
+    phone: Optional[str] = Field(None, description="Client phone")
+    message: Optional[str] = Field(None, description="Additional message")
+    pack_name: Optional[str] = Field(None, description="Selected pack name")
+    platform: Optional[str] = Field(None, description="Selected platform")
+
+class Consultation(BaseModel):
+    full_name: str = Field(..., description="Client full name")
+    phone: str = Field(..., description="Client phone")
+    preferred_time: Optional[str] = Field(None, description="Preferred time slot")
+    notes: Optional[str] = Field(None, description="Additional notes")
